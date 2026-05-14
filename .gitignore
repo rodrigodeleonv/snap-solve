@@ -1,0 +1,48 @@
+# Screenshots (temporary capture files)
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.tiff
+*.webp
+screenshots/
+temp/
+
+# Environment / secrets
+.env
+.env.local
+
+# Virtual environment
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/
+*.whl
+venv/
+.venv/
+env/
+.env/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/

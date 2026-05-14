@@ -1,0 +1,44 @@
+[project]
+name = "snap-solve"
+version = "0.1.0"
+description = "Screenshot-to-AI instant answer tool"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.40.0",
+    "mss>=9.0.1",
+    "pillow>=10.0.0",
+    "pynput>=1.7.6",
+    "python-dotenv>=1.0.0",
+    "pyperclip>=1.8.2",
+    "openai>=2.36.0",
+    "groq>=1.2.0",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.409",
+    "ruff>=0.15.13",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pyright]
+pythonVersion = "3.10"
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "standard"
