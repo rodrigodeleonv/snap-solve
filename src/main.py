@@ -11,6 +11,7 @@ UI updates are always scheduled on the main thread via root.after(0, fn).
 """
 
 import logging
+import signal
 import threading
 import tkinter as tk
 
@@ -40,15 +41,30 @@ class App:
         )
         listener.start()
 
+        # SIGINT handler: tkinter's C-level mainloop blocks Python's signal
+        # processing on macOS, so plain Ctrl-C often gets ignored. We schedule
+        # the quit on the tk thread via after(0, ...).
+        signal.signal(signal.SIGINT, lambda *_: self._root.after(0, self._quit))
+
+        # Periodic tick keeps Python responsive so the queued signal handler
+        # actually fires (mainloop yields to Python between after() callbacks).
+        # 1s is fine — Ctrl-C is human-triggered, sub-second response is enough.
+        self._root.after(1000, self._heartbeat)
+
         log.info("Running. Press %s to capture.", config.HOTKEY)
         log.info("Press Ctrl-C in this terminal to quit.")
 
         try:
             self._root.mainloop()
-        except KeyboardInterrupt:
-            pass
         finally:
             listener.stop()
+
+    def _heartbeat(self) -> None:
+        self._root.after(1000, self._heartbeat)
+
+    def _quit(self) -> None:
+        log.info("Shutting down.")
+        self._root.quit()
 
     # ── Hotkey callback (runs in pynput thread) ────────────────────────────────
 
