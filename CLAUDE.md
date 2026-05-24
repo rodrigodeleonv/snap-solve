@@ -33,7 +33,7 @@ All three must pass before committing. Run `/py` for the full style guide.
 
 ## Configuration
 
-The app reads from `.env` (git-ignored). Copy `example.env` to `.env` to configure. The only required field is one of `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`.
+The app reads from `.env` (git-ignored). Copy `example.env` to `.env` to configure. The only required field is one of `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GROQ_API_KEY`.
 
 ## Architecture
 

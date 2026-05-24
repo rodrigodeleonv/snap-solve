@@ -14,5 +14,20 @@
       "Read(**/*.pem)",
       "Read(**/*.key)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *.py) out=$(uv run ruff format --check src/ snapsolve.py 2>&1 && uv run ruff check src/ snapsolve.py 2>&1 && uv run pyright src/ 2>&1) || { printf '%s\\n' \"$out\" >&2; exit 2; } ;; esac",
+            "timeout": 60,
+            "statusMessage": "Running ruff format/check + pyright..."
+          }
+        ]
+      }
+    ]
   }
 }
