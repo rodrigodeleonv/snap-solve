@@ -52,14 +52,18 @@ class App:
     def _on_hotkey(self) -> None:
         with self._lock:
             if self._busy:
+                print("[SnapSolve] Already processing — ignoring hotkey.")
                 return
             self._busy = True
 
         # Capture screenshot immediately (before the UI window appears,
         # so the window doesn't show up in the screenshot)
+        print("[SnapSolve] Taking screenshot...")
         try:
             png = capture_screen()
+            print(f"[SnapSolve] Screenshot captured ({len(png):,} bytes).")
         except Exception as exc:
+            print(f"[SnapSolve] ERROR capturing screenshot: {exc}")
             self._root.after(0, lambda e=exc: self._show_error(str(e)))
             with self._lock:
                 self._busy = False
@@ -80,13 +84,17 @@ class App:
 
     def _analyze_and_display(self, png: bytes) -> None:
         try:
+            print(f"[SnapSolve] Sending screenshot to {config.provider} ({config.model})...")
             response = analyze(png)
+            print("[SnapSolve] Response received. Displaying result.")
             self._root.after(0, lambda: self._window.show_response(response))
         except Exception as exc:
+            print(f"[SnapSolve] ERROR generating response: {exc}")
             self._root.after(0, lambda e=exc: self._show_error(str(e)))
         finally:
             with self._lock:
                 self._busy = False
 
     def _show_error(self, message: str) -> None:
+        print(f"[SnapSolve] Showing error to user: {message}")
         self._window.show_error(message)
