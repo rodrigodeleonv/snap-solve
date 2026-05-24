@@ -1,7 +1,10 @@
+import logging
 import threading
 from collections.abc import Callable
 
 from pynput import keyboard
+
+log = logging.getLogger("snapsolve.hotkey")
 
 
 class HotkeyListener:
@@ -22,7 +25,7 @@ class HotkeyListener:
             self._listener.stop()
 
     def _run(self) -> None:
-        print(f"[SnapSolve] Listening on hotkey: {self._hotkey}")
+        log.info("Listening on hotkey: %s", self._hotkey)
         self._listener = keyboard.GlobalHotKeys({self._hotkey: self._on_activate})
         with self._listener:
             self._listener.join()

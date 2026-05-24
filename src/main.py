@@ -10,6 +10,7 @@ Thread model
 UI updates are always scheduled on the main thread via root.after(0, fn).
 """
 
+import logging
 import threading
 import tkinter as tk
 
@@ -18,6 +19,8 @@ from .config import config
 from .hotkey import HotkeyListener
 from .screenshot import capture_screen
 from .ui import ResponseWindow
+
+log = logging.getLogger("snapsolve.main")
 
 
 class App:
@@ -37,8 +40,8 @@ class App:
         )
         listener.start()
 
-        print(f"[SnapSolve] Running. Press {config.HOTKEY} to capture.")
-        print("[SnapSolve] Press Ctrl-C in this terminal to quit.")
+        log.info("Running. Press %s to capture.", config.HOTKEY)
+        log.info("Press Ctrl-C in this terminal to quit.")
 
         try:
             self._root.mainloop()
@@ -52,18 +55,18 @@ class App:
     def _on_hotkey(self) -> None:
         with self._lock:
             if self._busy:
-                print("[SnapSolve] Already processing — ignoring hotkey.")
+                log.info("Already processing — ignoring hotkey.")
                 return
             self._busy = True
 
         # Capture screenshot immediately (before the UI window appears,
         # so the window doesn't show up in the screenshot)
-        print("[SnapSolve] Taking screenshot...")
+        log.info("Taking screenshot...")
         try:
             png = capture_screen()
-            print(f"[SnapSolve] Screenshot captured ({len(png):,} bytes).")
+            log.info("Screenshot captured (%s bytes).", f"{len(png):,}")
         except Exception as exc:
-            print(f"[SnapSolve] ERROR capturing screenshot: {exc}")
+            log.error("Error capturing screenshot: %s", exc)
             self._root.after(0, lambda e=exc: self._show_error(str(e)))
             with self._lock:
                 self._busy = False
@@ -84,17 +87,17 @@ class App:
 
     def _analyze_and_display(self, png: bytes) -> None:
         try:
-            print(f"[SnapSolve] Sending screenshot to {config.provider} ({config.model})...")
+            log.info("Sending screenshot to %s (%s)...", config.provider, config.model)
             response = analyze(png)
-            print("[SnapSolve] Response received. Displaying result.")
+            log.info("Response received. Displaying result.")
             self._root.after(0, lambda: self._window.show_response(response))
         except Exception as exc:
-            print(f"[SnapSolve] ERROR generating response: {exc}")
+            log.error("Error generating response: %s", exc)
             self._root.after(0, lambda e=exc: self._show_error(str(e)))
         finally:
             with self._lock:
                 self._busy = False
 
     def _show_error(self, message: str) -> None:
-        print(f"[SnapSolve] Showing error to user: {message}")
+        log.info("Showing error to user: %s", message)
         self._window.show_error(message)

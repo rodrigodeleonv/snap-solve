@@ -1,9 +1,12 @@
+import logging
 import os
 import sys
 from pathlib import Path
 from typing import ClassVar
 
 from dotenv import load_dotenv
+
+log = logging.getLogger("snapsolve.config")
 
 _root = Path(__file__).parent.parent
 load_dotenv(_root / ".env")
@@ -85,19 +88,15 @@ class Config:
         if p in _required:
             var, val = _required[p]
             if not val:
-                print(
-                    f"[SnapSolve] ERROR: SNAPSOLVE_PROVIDER={p} but {var} is not set.",
-                    file=sys.stderr,
-                )
+                log.error("SNAPSOLVE_PROVIDER=%s but %s is not set.", p, var)
                 sys.exit(1)
         elif not p:
-            print(
-                "[SnapSolve] ERROR: No API key found.\n"
-                "  Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or GROQ_API_KEY in your .env file.",
-                file=sys.stderr,
+            log.error(
+                "No API key found. Set ANTHROPIC_API_KEY, OPENAI_API_KEY, "
+                "or GROQ_API_KEY in your .env file."
             )
             sys.exit(1)
-        print(f"[SnapSolve] Provider: {p} | Model: {self.model}")
+        log.info("Provider: %s | Model: %s", p, self.model)
 
 
 config = Config()
