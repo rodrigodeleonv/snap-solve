@@ -72,38 +72,44 @@ class ResponseWindow:
         sh = top.winfo_screenheight()
         top.geometry(f"{w}x{h}+{(sw - w) // 2}+{(sh - h) // 2}")
 
-        # ── Header bar ────────────────────────────────────────────────────────
-        header = tk.Frame(top, bg=BG_PANEL, pady=8)
-        header.pack(fill=tk.X)
-
-        logo_font = tkfont.Font(family="Helvetica", size=13, weight="bold")
-        tk.Label(header, text="  SnapSolve", font=logo_font, bg=BG_PANEL, fg=ACCENT).pack(
-            side=tk.LEFT
-        )
-
-        tk.Button(
-            header,
-            text="✕",
-            bg=BG_PANEL,
-            fg=FG_MUTED,
-            activebackground=BTN_CLOSE,
-            activeforeground=FG_WHITE,
-            relief=tk.FLAT,
-            bd=0,
+        # ── Status line ───────────────────────────────────────────────────────
+        self._status = tk.Label(
+            top,
+            text="",
+            bg=BG_DARK,
+            fg=ACCENT,
+            font=("Helvetica", 9),
+            anchor="w",
             padx=12,
-            pady=4,
+            pady=6,
+        )
+        self._status.pack(side=tk.TOP, fill=tk.X)
+
+        # ── Bottom buttons ────────────────────────────────────────────────────
+        # Pack BEFORE the text area with side=BOTTOM so the buttons reserve
+        # their space first and never get pushed off-screen by the expanding text.
+        btn_bar = tk.Frame(top, bg=BG_DARK, pady=10)
+        btn_bar.pack(side=tk.BOTTOM, fill=tk.X, padx=10)
+
+        self._make_button(
+            btn_bar,
+            text="Copy",
+            bg=BTN_COPY,
+            hover_bg="#1b4332",
+            command=self._copy_to_clipboard,
+        ).pack(side=tk.LEFT)
+
+        self._make_button(
+            btn_bar,
+            text="Close",
+            bg=BTN_CLOSE,
+            hover_bg="#b5153e",
             command=self._close,
         ).pack(side=tk.RIGHT)
 
-        # ── Status line ───────────────────────────────────────────────────────
-        self._status = tk.Label(
-            top, text="", bg=BG_DARK, fg=ACCENT, font=("Helvetica", 9), anchor="w", padx=12
-        )
-        self._status.pack(fill=tk.X)
-
-        # ── Scrollable text area ───────────────────────────────────────────────
+        # ── Scrollable text area (fills remaining space) ──────────────────────
         frame = tk.Frame(top, bg=BG_DARK, padx=10, pady=4)
-        frame.pack(fill=tk.BOTH, expand=True)
+        frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         sb = tk.Scrollbar(frame, troughcolor=BG_DARK, bg=BG_PANEL)
         sb.pack(side=tk.RIGHT, fill=tk.Y)
@@ -127,41 +133,36 @@ class ResponseWindow:
         self._text.pack(fill=tk.BOTH, expand=True)
         sb.config(command=self._text.yview)
 
-        # ── Bottom buttons ────────────────────────────────────────────────────
-        btn_bar = tk.Frame(top, bg=BG_DARK, pady=8)
-        btn_bar.pack(fill=tk.X, padx=10)
-
-        btn_style: dict[str, Any] = dict(
-            relief=tk.FLAT, bd=0, padx=16, pady=6, font=("Helvetica", 10, "bold"), cursor="hand2"
-        )
-
-        tk.Button(
-            btn_bar,
-            text="Copy",
-            bg=BTN_COPY,
-            fg=FG_WHITE,
-            activebackground="#1b4332",
-            command=self._copy_to_clipboard,
-            **btn_style,
-        ).pack(side=tk.LEFT)
-
-        tk.Button(
-            btn_bar,
-            text="Close",
-            bg=BTN_CLOSE,
-            fg=FG_WHITE,
-            activebackground="#b5153e",
-            command=self._close,
-            **btn_style,
-        ).pack(side=tk.RIGHT)
-
         top.bind("<Escape>", lambda _: self._close())
         top.protocol("WM_DELETE_WINDOW", self._close)
 
-        # Make window draggable by header
-        self._make_draggable(header)
-
         self._top = top
+
+    def _make_button(
+        self, parent: tk.Widget, text: str, bg: str, hover_bg: str, command: Any
+    ) -> tk.Frame:
+        """Frame+Label fake button — tk.Button ignores bg on macOS, this doesn't."""
+        btn_font = tkfont.Font(family="Helvetica", size=11, weight="bold")
+        frame = tk.Frame(parent, bg=bg, padx=18, pady=8, cursor="hand2")
+        label = tk.Label(frame, text=text, bg=bg, fg=FG_WHITE, font=btn_font, cursor="hand2")
+        label.pack()
+
+        def on_enter(_: tk.Event) -> None:
+            frame.config(bg=hover_bg)
+            label.config(bg=hover_bg)
+
+        def on_leave(_: tk.Event) -> None:
+            frame.config(bg=bg)
+            label.config(bg=bg)
+
+        def on_click(_: tk.Event) -> None:
+            command()
+
+        for w in (frame, label):
+            w.bind("<Enter>", on_enter)
+            w.bind("<Leave>", on_leave)
+            w.bind("<Button-1>", on_click)
+        return frame
 
     def _set_status(self, text: str, color: str = FG_MUTED) -> None:
         if self._status:
@@ -192,17 +193,3 @@ class ResponseWindow:
 
     def _close(self) -> None:
         self._destroy_existing()
-
-    def _make_draggable(self, widget: tk.Widget) -> None:
-        widget.bind("<ButtonPress-1>", self._drag_start)
-        widget.bind("<B1-Motion>", self._drag_move)
-
-    def _drag_start(self, event: tk.Event) -> None:
-        self._drag_x = event.x_root - (self._top.winfo_x() if self._top else 0)
-        self._drag_y = event.y_root - (self._top.winfo_y() if self._top else 0)
-
-    def _drag_move(self, event: tk.Event) -> None:
-        if self._top:
-            x = event.x_root - self._drag_x
-            y = event.y_root - self._drag_y
-            self._top.geometry(f"+{x}+{y}")

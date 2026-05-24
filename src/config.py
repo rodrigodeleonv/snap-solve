@@ -22,10 +22,12 @@ _DEFAULT_PROMPT = (
     "Analyze the screenshot and respond based on what type of question it is:\n\n"
     "- MULTIPLE CHOICE: State the correct option letter/number (e.g. 'B') on the first line, "
     "then one short sentence explaining why. Nothing else.\n"
-    "- MATH / CALCULATION: Show only the key steps and the final answer. Skip lengthy explanations.\n"
+    "- MATH / CALCULATION: Show only the key steps and the final answer. Skip lengthy "
+    "explanations.\n"
     "- CODING: Provide only the correct code snippet, with a one-line comment if needed.\n"
-    "- OTHER QUESTION: Give the direct answer in 1–3 sentences max.\n\n"
-    "Never repeat the question. Never add unnecessary preamble or summaries. Be brutally concise.\n\n"
+    "- OTHER QUESTION: Give the direct answer in 1-3 sentences max.\n\n"
+    "Never repeat the question. Never add unnecessary preamble or summaries. "
+    "Be brutally concise.\n\n"
     "IMPORTANT: Always respond in the same language as the text in the screenshot."
 )
 
