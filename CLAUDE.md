@@ -27,9 +27,10 @@ uv run ruff check src/ snapsolve.py          # lint
 uv run ruff check --fix src/ snapsolve.py    # lint + auto-fix
 uv run ruff format src/ snapsolve.py         # format
 uv run pyright src/                          # type check
+uv run pytest                                # run tests
 ```
 
-All three must pass before committing. Run `/py` for the full style guide.
+All checks must pass before committing. Run `/py` for the full style guide.
 
 ## Configuration
 
