@@ -54,6 +54,10 @@ class Config:
 
     HOTKEY: str = os.getenv("SNAPSOLVE_HOTKEY", "<ctrl>+<shift>+s")
     SYSTEM_PROMPT: str = os.getenv("SNAPSOLVE_SYSTEM_PROMPT", _DEFAULT_PROMPT)
+    USER_PROMPT: str = os.getenv(
+        "SNAPSOLVE_USER_PROMPT",
+        "Please analyze this screenshot and provide your response.",
+    )
     MAX_TOKENS: int = int(os.getenv("SNAPSOLVE_MAX_TOKENS", "1024"))
 
     def _resolve_provider(self) -> str:
